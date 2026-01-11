@@ -1,0 +1,120 @@
+<form class="{{cssClass}} akdeniz" autocomplete="off">
+    
+    <header class="sheet-header">
+        <div class="header-content-grid">
+            <div class="profile-img-container">
+                <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}"/>
+            </div>
+            <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="{{localize "AKDENIZ.NombrePersonaje"}}"/></h1>
+            <div class="header-fields">
+                <div class="grid grid-2col">
+                    <div class="grid-cell"><label>{{localize "AKDENIZ.Origen"}}</label><input name="system.datosPersonales.origen" type="text" value="{{system.datosPersonales.origen}}" /></div>
+                    <div class="grid-cell"><label>{{localize "AKDENIZ.Profesion"}}</label><input name="system.datosPersonales.profesion" type="text" value="{{system.datosPersonales.profesion}}" /></div>
+                </div>
+            </div>
+            <div class="description-field">
+                <label>{{localize "AKDENIZ.Descripcion"}}</label>
+                <textarea name="system.datosPersonales.descripcion">{{system.datosPersonales.descripcion}}</textarea>
+            </div>
+        </div>
+    </header>
+
+    <section class="sheet-section valores-pj">
+        
+        <div class="grid grid-3col">
+            <div class="susurros box"><label>{{localize "AKDENIZ.Susurros"}}</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="system.valores.susurros.uno" {{checked system.valores.susurros.uno}}/>
+                    <input type="checkbox" name="system.valores.susurros.dos" {{checked system.valores.susurros.dos}}/>
+                    <input type="checkbox" name="system.valores.susurros.tres" {{checked system.valores.susurros.tres}}/>
+                </div>
+            </div>
+
+            <div class="recurso"><label>{{localize "AKDENIZ.Vida"}}</label><div class="recurso-inputs"><a class="arrow-control" data-action="down" data-target="system.vida.value"><i class="fas fa-caret-left"></i></a><input type="number" name="system.vida.value" value="{{system.vida.value}}" min="0" max="{{system.vida.max}}"/><span> / {{system.vida.max}}</span><a class="arrow-control" data-action="up" data-target="system.vida.value"><i class="fas fa-caret-right"></i></a></div></div>
+
+            <div class="recurso"><label>{{localize "AKDENIZ.Estres"}}</label><div class="recurso-inputs"><a class="arrow-control" data-action="down" data-target="system.estres.value"><i class="fas fa-caret-left"></i></a><input type="number" name="system.estres.value" value="{{system.estres.value}}" min="0" max="{{system.estres.max}}"/><span> / {{system.estres.max}}</span><a class="arrow-control" data-action="up" data-target="system.estres.value"><i class="fas fa-caret-right"></i></a></div></div>
+        </div>
+        
+        <div class="revelaciones box">
+            <label>{{localize "AKDENIZ.Revelaciones"}}</label>
+            <textarea name="system.valores.revelaciones">{{system.valores.revelaciones}}</textarea>
+        </div>
+
+    </section>
+
+    <section class="sheet-section caracteristicas-pj grid grid-3col">
+        <div class="planteamientos-columna box"><h3>{{localize "AKDENIZ.Planteamientos"}}</h3>
+            {{#each @root.CONFIG.AKDENIZ.listaPlanteamientos as |label key|}}
+            <div class="caracteristica-item">
+                <label title="{{localize (concat 'AKDENIZ.Desc.' key)}}">{{localize label}}</label>
+                <input type="number" name="system.caracteristicas.planteamientos.{{key}}" value="{{lookup ../system.caracteristicas.planteamientos key}}" min="0"/>
+            </div>
+            {{/each}}
+        </div>
+        <div class="habilidades-columna box"><h3>{{localize "AKDENIZ.Habilidades"}}</h3>
+            {{#each @root.CONFIG.AKDENIZ.listaHabilidades as |label key|}}
+            <div class="caracteristica-item">
+                <a class="roll-habilidad" data-roll-key="{{key}}" title="{{localize (concat 'AKDENIZ.Desc.' key)}}">
+                    <label>{{localize label}}</label>
+                </a>
+                <input type="number" name="system.caracteristicas.habilidades.{{key}}" value="{{lookup ../system.caracteristicas.habilidades key}}" min="0"/>
+            </div>
+            {{/each}}
+        </div>
+        
+        {{!-- SECCIÓN CORREGIDA: ESPECIALIDADES AHORA USAN KEY --}}
+        <div class="especialidades-columna box">
+            <div class="especialidad-header"><h3>{{localize "AKDENIZ.Especialidades"}}</h3><a class="item-add" data-type="especialidad" title="{{localize 'AKDENIZ.AnadirEspecialidad'}}"><i class="fas fa-plus"></i></a></div>
+            <div class="especialidad-item cabecera"><label>{{localize "AKDENIZ.Nombre"}}</label><label>{{localize "AKDENIZ.Valor"}}</label><label>&nbsp;</label></div>
+            {{#each system.caracteristicas.especialidades as |especialidad key|}}
+            <div class="especialidad-item" data-key="{{key}}" data-type="especialidad">
+                <input type="text" name="system.caracteristicas.especialidades.{{key}}.nombre" value="{{especialidad.nombre}}" placeholder="{{localize 'AKDENIZ.NuevaEspecialidad'}}"/>
+                <input type="number" name="system.caracteristicas.especialidades.{{key}}.valor" value="{{especialidad.valor}}" min="1"/>
+                <a class="item-delete" title="{{localize 'AKDENIZ.EliminarItem'}}"><i class="fas fa-trash"></i></a>
+            </div>
+            {{/each}}
+        </div>
+
+    </section>
+
+    <section class="sheet-section personalidad-pj grid grid-2col">
+        <div class="columna-izquierda flexcol">
+            <div class="talentos-columna box"><h3>{{localize "AKDENIZ.Talentos"}}</h3>
+                <ol class="items-list talentos-list">
+                {{#each items as |item id|}}
+                    {{#if (eq item.type "talento")}}
+                    <li class="item" data-item-id="{{item._id}}">
+                        <img src="{{item.img}}" title="{{item.name}}" width="24" height="24"/>
+                        <h4 class="item-name">{{item.name}}</h4>
+                        <div class="item-controls"><a class="item-control item-edit" title="{{localize 'AKDENIZ.EditarItem'}}"><i class="fas fa-edit"></i></a><a class="item-control item-delete" title="{{localize 'AKDENIZ.EliminarItem'}}"><i class="fas fa-trash"></i></a></div>
+                    </li>
+                    {{/if}}
+                {{/each}}
+                </ol>
+            </div>
+            <div class="texto-largo box defecto-box">
+                <label>{{localize "AKDENIZ.TemorDefecto"}}</label>
+                <textarea name="system.personalidad.defecto">{{system.personalidad.defecto}}</textarea>
+            </div>
+        </div>
+        <div class="columna-derecha flexcol">
+            <div class="equipo-columna box">
+                <h3>{{localize "AKDENIZ.Equipo"}}</h3> <ol class="items-list equipo-list">
+                {{#each items as |item id|}}
+                    {{#unless (eq item.type "talento")}}
+                    <li class="item" data-item-id="{{item._id}}">
+                        <img src="{{item.img}}" title="{{item.name}}" width="24" height="24"/>
+                        <h4 class="item-name">{{item.name}}</h4>
+                        <div class="item-controls"><a class="item-control item-edit" title="{{localize 'AKDENIZ.EditarItem'}}"><i class="fas fa-edit"></i></a><a class="item-control item-delete" title="{{localize 'AKDENIZ.EliminarItem'}}"><i class="fas fa-trash"></i></a></div>
+                    </li>
+                    {{/unless}}
+                {{/each}}
+                </ol>
+            </div>
+             <div class="texto-largo box trasfondo-box">
+                <label>{{localize "AKDENIZ.Trasfondo"}}</label>
+                <textarea name="system.personalidad.trasfondo">{{system.personalidad.trasfondo}}</textarea>
+            </div>
+        </div>
+    </section>
+</form>

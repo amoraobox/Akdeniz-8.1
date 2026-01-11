@@ -1,0 +1,104 @@
+<div class="akdeniz chat-card">
+    <div class="chat-header">
+        <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}"/>
+        <h3>Tirada de {{habilidadNombre}}</h3>
+        <div style="font-size: 0.85em; color: #444;">
+            <p style="margin: 0;">Planteamiento: <strong>{{planteamientoUsado}}</strong></p>
+            {{#if talentoUsado}}
+            <p style="margin: 0; color: #2a5c8a;">Talento: <strong>{{talentoUsado}}</strong></p>
+            {{/if}}
+        </div>
+    </div>
+
+    <div class="chat-body">
+        
+        <div class="dice-results-grid">
+            {{#if dadosD6HTML}}
+            <div class="dice-row d6-row">
+                {{{dadosD6HTML}}}
+            </div>
+            {{/if}}
+
+            {{#if dadosD12HTML}}
+            <div class="dice-row d12-row">
+                {{{dadosD12HTML}}}
+            </div>
+            {{/if}}
+        </div>
+
+        <div class="resultado-header {{cssResultado}}">
+            {{textoResultado}} ({{exitos}} / {{dificultad}})
+        </div>
+        
+        {{#if mostrarDano}}
+        <div class="dano-info resultado-header dano">
+            Daño: {{danoCalculado}}
+        </div>
+        {{/if}}
+
+        {{#if mostrarResumenEfectos}}
+        <div class="resumen" style="text-align: center; font-size: 0.9em; margin-top: 10px;">
+            {{#if oportunidades}} 
+            <div style="color: blue; margin-bottom: 2px;"><strong>{{oportunidades}} Oportunidades</strong> (Pares mismo dado).</div> 
+            {{/if}}
+            
+            {{#if adversidades}} 
+            <div style="color: red; margin-bottom: 2px;"><strong>{{adversidades}} Adversidades</strong> (Pares distinto dado).</div> 
+            {{/if}}
+            
+            {{#if trios}} 
+            <div style="color: purple; margin-bottom: 2px;"><strong>{{trios}} Tríos Mixtos.</strong></div> 
+            {{/if}}
+            
+            {{#if pureTrios}} 
+            <div style="color: darkmagenta; margin-bottom: 2px;"><strong>{{pureTrios}} Tríos Puros</strong> (-1 Estrés c/u).</div> 
+            {{/if}}
+        </div>
+        {{/if}}
+        
+        {{#if mostrarOportunidades}}
+        <div class="info-box oportunidad">
+            <h4>Oportunidades (Pares mismo dado / Tríos Puros):</h4>
+            <ul>
+                <li>Bajar 1 estrés.</li>
+                <li>Detalle del entorno o situación.</li>
+                <li>Añade 1 dado a la siguiente tirada relacionada.</li>
+                <li>1 pregunta al DJ.</li>
+                 {{#if pureTrios}}<li>(Los Tríos Puros ya bajaron {{pureTrios}} de Estrés)</li>{{/if}}
+            </ul>
+        </div>
+        {{/if}}
+
+        {{#if mostrarAdversidades}}
+        <div class="info-box adversidad">
+            <h4>Adversidades (Pares distinto dado):</h4>
+            <ul>
+                <li>Subir 1 estrés.</li>
+                <li>Obstáculo narrativo.</li>
+                <li>Aumentar la dificultad de la siguiente tirada.</li>
+            </ul>
+        </div>
+        {{/if}}
+        
+        {{#if mostrarTrios}}
+        <div class="info-box trio">
+            <h4>Tríos Mixtos (¡Elección!)</h4>
+            <p>Debes elegir una de las dos opciones:</p>
+            
+            <div class="trio-choice-wrapper">
+                <button class="akdeniz-trio-choice" data-choice="oportunidad" title="Ganas 1 Oportunidad narrativa a cambio de estrés">
+                    <i class="fas fa-lightbulb"></i> Oportunidad (+1 Estrés)
+                </button>
+                <button class="akdeniz-trio-choice" data-choice="adversidad" title="Sufres 1 Adversidad narrativa a cambio de bajar estrés">
+                    <i class="fas fa-shield-alt"></i> Adversidad (-1 Estrés)
+                </button>
+            </div>
+            
+            <div class="trio-choice-made" style="display: none;">
+                <p><b>Elección realizada: <span class="choice-text"></span></b></p>
+            </div>
+        </div>
+        {{/if}}
+
+    </div>
+</div>

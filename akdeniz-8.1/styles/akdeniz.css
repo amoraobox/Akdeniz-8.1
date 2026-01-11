@@ -1,0 +1,403 @@
+/* CONFIGURACIÓN GENERAL */
+.akdeniz .window-content { padding: 10px; background: #f0f0f0; text-align: left; }
+.akdeniz, .akdeniz-item-sheet { font-family: sans-serif; color: #333; text-align: left; }
+.akdeniz .grid { display: grid; gap: 10px; }
+.akdeniz .grid-2col { grid-template-columns: repeat(2, 1fr); }
+.akdeniz .grid-3col { grid-template-columns: repeat(3, 1fr); } 
+.akdeniz .sheet-section { margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; background: #fff; border-radius: 5px; }
+.akdeniz .box { border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #f9f9f9; height: 100%; box-sizing: border-box; }
+.akdeniz .flexcol, .akdeniz-item-sheet.flexcol { display: flex; flex-direction: column; gap: 5px; }
+.akdeniz label, .akdeniz-item-sheet label { font-weight: bold; margin-bottom: 2px; display: block; text-align: left; }
+.akdeniz input[type="text"], .akdeniz textarea, .akdeniz-item-sheet input[type="text"], .akdeniz-item-sheet textarea, .akdeniz-item-sheet select { width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 3px; padding: 4px; }
+.akdeniz input[type="number"] { width: 50px; text-align: center; }
+.akdeniz .charname { border-bottom: none; padding-bottom: 0; } 
+.akdeniz .charname input { font-size: 1.5em; font-weight: bold; border: none; background: none; padding: 0; }
+
+/* ================================================================== */
+/* HEADER (NUEVO DISEÑO DE GRID)                                    */
+/* ================================================================== */
+.akdeniz .sheet-header { margin-bottom: 10px; }
+.akdeniz .header-content-grid {
+  display: grid;
+  grid-template-columns: 150px 1fr; 
+  grid-template-rows: auto auto 1fr; 
+  gap: 5px 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 5px;
+  padding: 10px;
+}
+.akdeniz .profile-img-container {
+  grid-column: 1 / 2;
+  grid-row: 1 / 4; 
+  padding-right: 5px;
+}
+.akdeniz .profile-img {
+  width: 150px; 
+  height: 100%; 
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  object-fit: cover;
+}
+.akdeniz .charname { grid-column: 2 / 3; grid-row: 1 / 2; }
+.akdeniz .header-fields { grid-column: 2 / 3; grid-row: 2 / 3; }
+.akdeniz .description-field { grid-column: 2 / 3; grid-row: 3 / 4; }
+.akdeniz .description-field textarea { height: 60px; resize: vertical; }
+
+/* ================================================================== */
+/* VALORES (VIDA, ESTRES, ETC) - MODIFICADO                         */
+/* ================================================================== */
+.akdeniz .valores-pj { 
+  display: flex;
+  flex-direction: column;
+  gap: 10px; 
+  align-items: stretch;
+} 
+.akdeniz .recurso { 
+  display: flex; 
+  align-items: center; 
+  justify-content: flex-start; 
+  gap: 8px; 
+  padding: 5px; 
+  border: 1px solid #ccc; 
+  border-radius: 5px; 
+  background: #f9f9f9; 
+}
+.akdeniz .recurso label { font-size: 1.2em; margin-bottom: 0; flex-shrink: 0; }
+.akdeniz .recurso .recurso-inputs { display: flex; align-items: center; }
+.akdeniz .recurso .recurso-inputs input { 
+  margin: 0 5px; 
+  width: 60px; 
+  flex-grow: 0;
+  flex-shrink: 0;
+} 
+.akdeniz .recurso .recurso-inputs span { font-size: 1.1em; }
+.akdeniz .arrow-control { color: #888; text-decoration: none; font-size: 1.2em; }
+.akdeniz .arrow-control:hover { color: #333; }
+
+.akdeniz .susurros.box {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; 
+  gap: 8px; 
+  padding: 5px; 
+  height: 100%; 
+  box-sizing: border-box; 
+}
+.akdeniz .susurros.box label {
+  font-size: 1.2em;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+.akdeniz .susurros .checkbox-group { 
+  display: flex; 
+  justify-content: flex-start; 
+  align-items: center; 
+  flex-grow: 1; 
+  gap: 2px; 
+}
+.akdeniz .susurros .checkbox-group input {
+  margin: 0 1px; 
+}
+
+.akdeniz .revelaciones.box {
+  padding: 5px;
+  height: auto; 
+  display: flex; 
+  flex-direction: column;
+}
+.akdeniz .revelaciones.box label {
+  font-size: 1.2em;
+  margin-bottom: 2px;
+  flex-shrink: 0; 
+}
+.akdeniz .revelaciones textarea {
+  width: 100%;
+  min-height: 40px; 
+  flex-grow: 1; 
+  resize: vertical; 
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+
+/* ================================================================== */
+/* CARACTERÍSTICAS                                                    */
+/* ================================================================== */
+.akdeniz .caracteristica-item { display: grid; grid-template-columns: 1fr 50px; align-items: center; margin-bottom: 5px; }
+.akdeniz .caracteristica-item label { margin-bottom: 0; }
+.akdeniz .roll-habilidad label { text-decoration: underline; color: #444; font-weight: bold; }
+.akdeniz .roll-habilidad label:hover { color: #000; cursor: pointer; }
+.akdeniz .especialidad-header { display: flex; justify-content: space-between; align-items: center; }
+.akdeniz .especialidad-item { display: grid; grid-template-columns: 1fr 50px 30px; gap: 5px; align-items: center; margin-bottom: 3px; }
+.akdeniz .especialidad-item.cabecera { font-weight: bold; grid-template-columns: 1fr 50px 30px; }
+.akdeniz .especialidad-item.cabecera label { margin-bottom: 0; }
+.akdeniz .especialidad-item a { text-align: center; color: #888; }
+.akdeniz .especialidad-item a:hover { color: #c00; }
+.akdeniz .items-list { list-style: none; padding: 0; margin: 0; min-height: 50px; } 
+.akdeniz .item { display: grid; grid-template-columns: 24px 1fr 50px; align-items: center; gap: 5px; padding: 3px; border-bottom: 1px solid #eee; }
+.akdeniz .item:last-child { border-bottom: none; }
+.akdeniz .item .item-name { font-size: 1em; font-weight: bold; margin: 0; }
+.akdeniz .item .item-controls { display: flex; justify-content: flex-end; gap: 5px; }
+.akdeniz .item .item-control { color: #888; }
+.akdeniz .item .item-control:hover { color: #333; }
+.akdeniz .texto-largo textarea { height: 100px; resize: vertical; }
+
+/* ================================================================== */
+/* ESTILOS DE ITEM SHEETS (MODIFICADO)                              */
+/* ================================================================== */
+.akdeniz-item-sheet .charname-container { 
+  text-align: left; 
+  border-bottom: 1px solid #ccc; 
+  padding-bottom: 5px; 
+}
+.akdeniz-item-sheet .charname-container input { 
+  font-size: 1em; 
+  font-weight: bold; 
+  border: none; 
+  background: none; 
+  text-align: left; 
+  padding: 6px 0; 
+}
+.akdeniz-item-sheet .item-body-grid { display: grid; grid-template-columns: 120px 1fr; gap: 10px; margin-top: 10px; }
+
+.akdeniz-item-sheet .icon-container { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  height: 100%; 
+}
+.akdeniz-item-sheet .profile-img { 
+  width: 100px; 
+  height: 100%; 
+  border: 1px solid #ccc; 
+  border-radius: 5px; 
+  object-fit: cover; 
+}
+
+.akdeniz-item-sheet .fields-column { display: flex; flex-direction: column; height: 100%; }
+
+.akdeniz-item-sheet .form-group-descripcion {
+  display: flex;
+  flex-direction: column; 
+  flex-grow: 1; 
+}
+.akdeniz-item-sheet .form-group-descripcion label {
+  flex-shrink: 0; 
+  text-align: left; 
+  margin-bottom: 4px; 
+}
+.akdeniz-item-sheet .form-group-descripcion textarea {
+  flex-grow: 1; 
+  height: 150px; 
+  resize: vertical;
+}
+
+.akdeniz-item-sheet .specific-field-wrapper { margin-top: 10px; }
+.akdeniz-item-sheet .specific-field { display: flex; align-items: center; gap: 10px; }
+.akdeniz-item-sheet .specific-field label { margin-bottom: 0; flex-basis: 120px; flex-grow: 0; flex-shrink: 0; }
+.akdeniz-item-sheet .specific-field input, .akdeniz-item-sheet .specific-field select { flex-grow: 1; }
+.akdeniz-item-sheet .specific-field input[type="number"] { width: 80px; flex-grow: 0; }
+
+/* ESTILOS DE CHAT */
+.chat-card.akdeniz { border: 1px solid #aaa; border-radius: 5px; overflow: hidden; }
+.chat-card .chat-header { display: flex; align-items: center; background: #eee; padding: 5px; border-bottom: 1px solid #ccc; }
+.chat-card .profile-img { width: 36px; height: 36px; border-radius: 50%; margin-right: 8px; }
+.chat-card .chat-header h3 { font-size: 1.2em; margin: 0; padding: 0; }
+.chat-card .chat-header p { margin: 0 0 0 auto; font-size: 0.9em; color: #555; }
+.chat-card .chat-body { padding: 10px; }
+.chat-card .dice-results-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.chat-card .dice-row { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+
+/* SILUETAS DE DADOS */
+.chat-card .die-shape { 
+  width: 30px; 
+  height: 30px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  font-size: 1.1em; 
+  font-weight: bold; 
+  border: 2px solid; 
+  position: relative; 
+  overflow: hidden; 
+  border-radius: 3px; 
+}
+.chat-card .die-shape::before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.15; 
+    font-size: 2.2em; 
+    color: #ffffff;
+    z-index: 0; 
+}
+/* HE BORRADO LA CLASE VACIA .die-d6 QUE DABA ERROR */
+.chat-card .die-d6::before { content: "\f6cf"; }
+.chat-card .die-d12 { 
+  border-radius: 0; 
+  width: 32px; 
+  height: 32px;
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+.chat-card .die-d12::before { content: none; }
+.chat-card .numero { 
+  color: white; 
+  text-shadow: 1px 1px 1px black; 
+  position: relative; 
+  z-index: 1; 
+}
+
+.chat-card .die-shape.exito { background-color: #e0f2e0; border-color: #5cb85c; }
+.chat-card .die-shape.exito .numero { color: #333; }
+.chat-g .die-shape.no-exito { background-color: #f9f9f9; border-color: #aaa; }
+.chat-card .die-shape.no-exito { background-color: #6c757d; border-color: #5a6268; }
+
+.chat-card .numero.oportunidad { color: #00BFFF; }
+.chat-card .numero.adversidad { color: #FF6347; } 
+.chat-card .numero.trio-mixed { color: #DA70D6; } 
+.chat-card .numero.trio-pure { color: #8A2BE2; } 
+.chat-card .numero.dobleExito { color: #00FFFF; } 
+.chat-card .resultado-header { text-align: center; font-size: 1.5em; font-weight: bold; padding: 5px; border-radius: 5px; margin: 10px 0; }
+.chat-card .resultado-header.exito { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
+.chat-card .resultado-header.fallo { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+.chat-card .resultado-header.dano { background-color: #dc3545; color: white; border: 1px solid #c82333; }
+.chat-card .resumen { font-size: 0.9em; text-align: center; margin-bottom: 10px; }
+.chat-card .info-box { border: 1px solid; border-radius: 5px; padding: 8px; margin-top: 10px; }
+.chat-card .info-box h4 { margin: 0 0 5px 0; padding: 0; }
+.chat-card .info-box ul { margin: 0; padding-left: 20px; }
+.chat-card .info-box.oportunidad { background-color: #e6f7ff; border-color: #b3e0ff; }
+.chat-card .info-box.oportunidad h4 { color: #0056b3; }
+.chat-card .info-box.adversidad { background-color: #fbe6e6; border-color: #ffb3b3; }
+.chat-card .info-box.adversidad h4 { color: #b30000; }
+
+.akdeniz.chat-card .info-box.trio { background-color: #f3e5f5; border-color: #ce93d8; }
+.akdeniz.chat-card .info-box.trio h4 { color: #6a1b9a; }
+.akdeniz.chat-card .trio-choice-wrapper { display: flex; flex-direction: row; justify-content: space-around; gap: 10px; margin-top: 10px; }
+.akdeniz.chat-card .akdeniz-trio-choice { flex: 1; padding: 8px 5px; font-size: 0.9em; font-weight: bold; border-radius: 5px; border: 1px solid #aaa; cursor: pointer; transition: all 0.2s ease; background: #fff; color: #333; }
+.akdeniz.chat-card .akdeniz-trio-choice[data-choice="oportunidad"] { border-color: #007bff; color: #004085; }
+.akdeniz.chat-card .akdeniz-trio-choice[data-choice="oportunidad"]:hover { background-color: #e6f2ff; box-shadow: 0 0 5px rgba(0,123,255,0.5); }
+.akdeniz.chat-card .akdeniz-trio-choice[data-choice="adversidad"] { border-color: #dc3545; color: #721c24; }
+.akdeniz.chat-card .akdeniz-trio-choice[data-choice="adversidad"]:hover { background-color: #f8d7da; box-shadow: 0 0 5px rgba(220,53,69,0.5); }
+.akdeniz.chat-card .trio-choice-made { margin-top: 10px; text-align: center; font-weight: bold; background-color: #e9ecef; padding: 5px; border-radius: 3px; border: 1px solid #ced4da; }
+
+/* =========================================
+   ESTILOS ESPECÍFICOS PARA FICHA DE PNJ
+========================================= */
+
+.akdeniz.sheet.pnj .pnj-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 5px;
+    align-items: end; 
+}
+
+.akdeniz.sheet.pnj .recurso.desafio-box .recurso-inputs input {
+    text-align: center;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.05); 
+    border-radius: 4px;
+}
+
+.akdeniz.sheet.pnj .recurso.desafio-box .recurso-inputs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%; 
+}
+
+/* ================================================================== */
+/* HOJA DE TALENTOS - ESTILOS NUEVOS (TALENTO PNJ)                    */
+/* ================================================================== */
+
+/* Ajustes adicionales para la hoja de item */
+.akdeniz-item-sheet .sheet-header {
+    flex: 0 0 80px;
+}
+
+/* Contenedor principal de la sección PNJ */
+.akdeniz-item-sheet .efectos-pnj-container {
+    background: #fdfdfd;
+    border: 1px solid #a8b2c1;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+/* Cabecera de la tabla de efectos */
+.akdeniz-item-sheet .pnj-effects-grid-header {
+    display: grid;
+    grid-template-columns: 30px 1fr 60px 60px 40px;
+    gap: 5px;
+    font-weight: bold;
+    font-size: 0.9em;
+    border-bottom: 2px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+/* Filas de efectos */
+.akdeniz-item-sheet .pnj-effect-row {
+    display: grid;
+    grid-template-columns: 30px 1fr 60px 60px 40px;
+    gap: 5px;
+    align-items: center;
+    margin-bottom: 6px;
+    padding: 4px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+/* Estilo cuando la fila está inactiva (grisácea) */
+.akdeniz-item-sheet .pnj-effect-row.inactive {
+    background: #f0f0f0;
+    color: #888;
+}
+
+/* Alineación de inputs dentro de la grid */
+.akdeniz-item-sheet .pnj-effect-row input[type="text"],
+.akdeniz-item-sheet .pnj-effect-row input[type="number"] {
+    text-align: center;
+    height: 26px;
+}
+
+/* Botón Toggle (Interruptor) */
+.akdeniz-item-sheet .hidden-toggle {
+    display: none; /* Ocultamos el checkbox real */
+}
+
+.akdeniz-item-sheet .toggle-btn {
+    cursor: pointer;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.akdeniz-item-sheet .toggle-btn.on {
+    color: #2e7d32; /* Verde encendido */
+    text-shadow: 0 0 3px #a5d6a7;
+}
+
+.akdeniz-item-sheet .toggle-btn.off {
+    color: #ccc; /* Gris apagado */
+}
+
+.akdeniz-item-sheet .toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Editor de descripción */
+.akdeniz-item-sheet .editor {
+    min-height: 200px;
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 5px;
+}

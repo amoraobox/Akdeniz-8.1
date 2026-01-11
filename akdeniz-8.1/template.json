@@ -1,0 +1,79 @@
+{
+  "Actor": {
+    "types": ["personaje", "esbirro", "pnj"],
+    "templates": {
+      "base": {
+        "vida": { "value": 10, "max": 10 },
+        "estres": { "value": 0, "max": 5 },
+        "img": "icons/svg/mystery-man.svg"
+      }
+    },
+    "personaje": {
+        "templates": ["base"],
+        "datosPersonales": {
+             "concepto": "",
+             "profesion": "",
+             "descripcion": ""
+        },
+        "caracteristicas": {
+            "planteamientos": {},
+            "habilidades": {},
+            "especialidades": {},
+            "planteamientoGeneral": 0,
+            "habilidadGeneral": 0
+        },
+        "experiencia": { "value": 0, "max": 10 }
+    },
+    "esbirro": {
+        "templates": ["base"],
+        "datosPersonales": {
+            "origen": "",
+            "profesion": "",
+            "descripcion": ""
+        },
+        "dificultad": 1,
+        "efectivos": { "value": 1, "max": 1 },
+        "caracteristicas": {
+            "planteamientos": {},
+            "habilidades": {},
+            "especialidades": {},
+            "planteamientoGeneral": 0,
+            "habilidadGeneral": 0
+        }
+    },
+    "pnj": {
+        "templates": ["base"],
+        "datosPersonales": {
+            "origen": "",
+            "profesion": "",
+            "descripcion": ""
+        },
+        "biografia": "",
+        "dificultad": 1
+    }
+  },
+  "Item": {
+    "types": ["arma", "artefacto", "talento", "objeto"],
+    "templates": {
+      "base": { "descripcion": "" }
+    },
+    "arma": {
+      "templates": ["base"],
+      "daño": 0,
+      "tipo": ""
+    },
+    "artefacto": {
+      "templates": ["base"],
+      "efecto": ""
+    },
+    "talento": {
+       "templates": ["base"],
+       "coste": 0
+    },
+    "objeto": {
+      "templates": ["base"],
+      "cantidad": 1,
+      "peso": 0
+    }
+  }
+}

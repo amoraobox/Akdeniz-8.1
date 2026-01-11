@@ -1,0 +1,114 @@
+<form>
+    <div class="form-group">
+        <label>{{localize "AKDENIZ.Planteamiento"}}:</label>
+        <select name="planteamiento" id="select-planteamiento">
+            {{#each planteamientos as |valor key|}}
+            <option value="{{key}}" data-valor="{{valor}}">{{localize (concat "AKDENIZ." key)}}</option>
+            {{/each}}
+        </select>
+    </div>
+    
+    <div class="grid grid-2col" style="gap: 10px;">
+        <div class="form-group">
+            <label>{{localize "AKDENIZ.Dialogo.Dificultad"}}:</label>
+            <select name="dificultad">
+                <option value="1">{{localize "AKDENIZ.Dialogo.Facil"}}</option>
+                <option value="2" selected>{{localize "AKDENIZ.Dialogo.Normal"}}</option>
+                <option value="3">{{localize "AKDENIZ.Dialogo.Complicado"}}</option>
+                <option value="4">{{localize "AKDENIZ.Dialogo.Dificil"}}</option>
+                <option value="5">{{localize "AKDENIZ.Dialogo.MuyDificil"}}</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>{{localize "AKDENIZ.Dialogo.UsarEspecialidad"}}</label>
+            <select name="especialidad">
+                <option value="0">{{localize "AKDENIZ.Dialogo.Ninguna"}}</option>
+                {{#each especialidades as |esp|}}
+                <option value="{{esp.valor}}">{{esp.nombre}} (-{{esp.valor}})</option>
+                {{/each}}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{localize "AKDENIZ.Talentos"}}</label>
+        <select name="talentoSeleccionado">
+            <option value="">{{localize "AKDENIZ.Dialogo.Ninguna"}}</option>
+            {{#each talentos as |talento|}}
+            <option value="{{talento._id}}">{{talento.name}} ({{talento.system.tipo}})</option>
+            {{/each}}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>{{localize "AKDENIZ.Dialogo.UsarArma"}}</label>
+        <select name="armaSeleccionada">
+            <option value="">{{localize "AKDENIZ.Dialogo.SinArma"}}</option>
+            {{#each armas as |arma|}}
+            <option value="{{arma._id}}">{{arma.name}}</option>
+            {{/each}}
+        </select>
+    </div>
+    
+    <hr>
+    
+    <h3 style="margin-bottom: 5px; border-bottom: none; font-size: 1.1em;">Modificar Reserva de Dados</h3>
+    
+    <div style="display: flex; flex-direction: row; gap: 5px; width: 100%; align-items: stretch;">
+        
+        <div class="mod-box" style="flex: 1; border: 1px solid #ccc; padding: 4px; border-radius: 5px; background: #fdfdfd; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+            <label style="display: block; font-size: 0.75em; font-weight: bold; margin-bottom: 2px; white-space: nowrap;">Plant. (d6)</label>
+            <input type="hidden" name="modPlanteamiento" id="input-mod-plant" value="0">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 2px;">
+                <button type="button" class="btn-circle btn-minus" data-target="modPlanteamiento" style="width: 20px; height: 20px; font-size: 0.7em;"><i class="fas fa-minus"></i></button>
+                <div style="font-weight: bold; font-size: 1.1em; min-width: 25px;">
+                    <span id="display-planteamiento-base" style="color: #555;">0</span>
+                    <span id="display-mod-plant" style="color: #007bff; font-size: 0.8em;"></span>
+                </div>
+                <button type="button" class="btn-circle btn-plus" data-target="modPlanteamiento" style="width: 20px; height: 20px; font-size: 0.7em;"><i class="fas fa-plus"></i></button>
+            </div>
+        </div>
+
+        <div class="mod-box" style="flex: 1; border: 1px solid #ccc; padding: 4px; border-radius: 5px; background: #fdfdfd; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+            <label style="display: block; font-size: 0.75em; font-weight: bold; margin-bottom: 2px; white-space: nowrap;">Habil. (d12)</label>
+            <input type="hidden" name="modHabilidad" id="input-mod-hab" value="0">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 2px;">
+                <button type="button" class="btn-circle btn-minus" data-target="modHabilidad" style="width: 20px; height: 20px; font-size: 0.7em;"><i class="fas fa-minus"></i></button>
+                <div style="font-weight: bold; font-size: 1.1em; min-width: 25px;">
+                    <span style="color: #555;">{{habilidadValorBase}}</span>
+                    <span id="display-mod-hab" style="color: #007bff; font-size: 0.8em;"></span>
+                </div>
+                <button type="button" class="btn-circle btn-plus" data-target="modHabilidad" style="width: 20px; height: 20px; font-size: 0.7em;"><i class="fas fa-plus"></i></button>
+            </div>
+        </div>
+
+        <div class="mod-box" style="flex: 1; border: 1px solid #daa; padding: 4px; border-radius: 5px; background: #fff5f5; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+            <label style="display: block; font-size: 0.75em; font-weight: bold; margin-bottom: 2px; color: #a00; white-space: nowrap;">Estrés (+d6)</label>
+            <input type="hidden" name="dadosExtra" id="input-dados-extra" value="0">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <span id="display-dados-extra" style="font-size: 1.4em; font-weight: bold; color: #c00;">0</span>
+                <button type="button" class="btn-circle btn-cycle" title="Coste: 2 Estrés/dado" style="width: 22px; height: 22px; font-size: 0.7em; border-color: #c00; color: #c00;"><i class="fas fa-plus"></i></button>
+            </div>
+        </div>
+
+    </div>
+    
+    <div style="text-align: right; font-size: 0.8em; color: #888; margin-top: 4px;">
+        Coste Total Estrés: <span id="display-coste-estres">0</span>
+    </div>
+</form>
+
+<style>
+    .btn-circle {
+        padding: 0;
+        line-height: 1;
+        border-radius: 50%;
+        border: 1px solid #888;
+        background: #eee;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-circle:hover { background: #ddd; }
+</style>

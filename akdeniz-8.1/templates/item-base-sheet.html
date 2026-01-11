@@ -1,0 +1,28 @@
+<form class="{{cssClass}} akdeniz-item-sheet flexcol" autocomplete="off">
+    <h1 class="charname-container">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize "AKDENIZ.Item.NombreItem"}}"/>
+    </h1>
+
+    <div class="item-body-grid">
+        <div class="icon-container">
+             <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
+        </div>
+
+        <div class="fields-column flexcol">
+            
+            <div class="form-group form-group-descripcion">
+                <label>{{localize "AKDENIZ.Item.Descripcion"}}</label>
+                <textarea name="system.description">{{system.description}}</textarea>
+            </div>
+
+            <div class="specific-field-wrapper">
+                {{#if (eq item.type "objeto")}}
+                <div class="form-group specific-field"> <label>{{localize "AKDENIZ.Item.Cantidad"}}</label> <input type="number" name="system.cantidad" value="{{system.cantidad}}"/></div>
+                {{/if}}
+                {{#if (eq item.type "armadura")}}
+                <div class="form-group specific-field"> <label>{{localize "AKDENIZ.Item.Proteccion"}}</label> <input type="number" name="system.proteccion" value="{{system.proteccion}}"/></div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,88 @@
+<form class="{{cssClass}} akdeniz-item-sheet flexcol" autocomplete="off">
+  
+  <header class="charname-container" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+      <div style="flex: 2;">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize "AKDENIZ.Item.NombreTalento"}}" style="width: 100%; font-size: 1.2em;"/>
+      </div>
+      
+      {{#if mecanicaTexto}}
+      <div style="flex: 3; background: #eef; border: 1px solid #aac; border-radius: 4px; padding: 5px; text-align: center; font-size: 0.85em; color: #335; display: flex; align-items: center; justify-content: center;">
+          {{mecanicaTexto}}
+      </div>
+      {{/if}}
+
+      <div style="flex: 1.5; text-align: right;">
+        <label style="display:block; font-size: 0.8em; color: #555;">{{localize "AKDENIZ.TalentoTipo"}}</label>
+        <select name="system.tipoTalento">
+            <option value="General" {{#if (eq system.tipoTalento "General")}}selected{{/if}}>{{localize "AKDENIZ.TalentoGeneral"}}</option>
+            <option value="Origen" {{#if (eq system.tipoTalento "Origen")}}selected{{/if}}>{{localize "AKDENIZ.Item.Tipo.Origen"}}</option>
+            <option value="Oficio" {{#if (eq system.tipoTalento "Oficio")}}selected{{/if}}>{{localize "AKDENIZ.Item.Tipo.Oficio"}}</option>
+            <option value="Capacidad" {{#if (eq system.tipoTalento "Capacidad")}}selected{{/if}}>{{localize "AKDENIZ.Item.Tipo.Capacidad"}}</option>
+            <option value="Plegaria" {{#if (eq system.tipoTalento "Plegaria")}}selected{{/if}}>{{localize "AKDENIZ.Item.Tipo.Plegaria"}}</option>
+            <option value="PNJ" {{#if (eq system.tipoTalento "PNJ")}}selected{{/if}}>{{localize "AKDENIZ.TalentoPNJ"}}</option>
+        </select>
+      </div>
+  </header>
+
+  <div class="sheet-body">
+    
+    {{#if (eq system.tipoTalento "PNJ")}}
+    <div class="efectos-pnj-container">
+        <h3 style="border-bottom: 1px solid #ccc; margin-bottom: 5px;">{{localize "AKDENIZ.EfectosPNJ"}}</h3>
+        
+        <div class="pnj-effects-grid-header">
+            <span>{{localize "AKDENIZ.PNJ.Activo"}}</span>
+            <span>Efecto</span>
+            <span>{{localize "AKDENIZ.PNJ.Usos"}}</span>
+            <span>{{localize "AKDENIZ.PNJ.Valor"}}</span>
+            <span>{{localize "AKDENIZ.PNJ.Habilitado"}}</span>
+        </div>
+
+        <div class="pnj-effect-row {{#unless system.efectosPNJ.desafio.activo}}inactive{{/unless}}">
+            <input type="checkbox" name="system.efectosPNJ.desafio.activo" {{checked system.efectosPNJ.desafio.activo}}>
+            <label>{{localize "AKDENIZ.PNJ.Desafio"}}</label>
+            {{#if system.efectosPNJ.desafio.activo}}
+                <input type="text" name="system.efectosPNJ.desafio.usos" value="{{system.efectosPNJ.desafio.usos}}" placeholder="∞">
+                <input type="number" name="system.efectosPNJ.desafio.valor" value="{{system.efectosPNJ.desafio.valor}}">
+                <input type="checkbox" name="system.efectosPNJ.desafio.habilitado" {{checked system.efectosPNJ.desafio.habilitado}}>
+            {{/if}}
+        </div>
+
+        <div class="pnj-effect-row {{#unless system.efectosPNJ.vida.activo}}inactive{{/unless}}">
+            <input type="checkbox" name="system.efectosPNJ.vida.activo" {{checked system.efectosPNJ.vida.activo}}>
+            <label>{{localize "AKDENIZ.PNJ.Vida"}}</label>
+            {{#if system.efectosPNJ.vida.activo}}
+                <input type="text" name="system.efectosPNJ.vida.usos" value="{{system.efectosPNJ.vida.usos}}" placeholder="∞">
+                <input type="number" name="system.efectosPNJ.vida.valor" value="{{system.efectosPNJ.vida.valor}}">
+                <input type="checkbox" name="system.efectosPNJ.vida.habilitado" {{checked system.efectosPNJ.vida.habilitado}}>
+            {{/if}}
+        </div>
+
+        <div class="pnj-effect-row {{#unless system.efectosPNJ.estres.activo}}inactive{{/unless}}">
+            <input type="checkbox" name="system.efectosPNJ.estres.activo" {{checked system.efectosPNJ.estres.activo}}>
+            <label>{{localize "AKDENIZ.PNJ.Estres"}}</label>
+            {{#if system.efectosPNJ.estres.activo}}
+                <input type="text" name="system.efectosPNJ.estres.usos" value="{{system.efectosPNJ.estres.usos}}" placeholder="∞">
+                <input type="number" name="system.efectosPNJ.estres.valor" value="{{system.efectosPNJ.estres.valor}}">
+                <input type="checkbox" name="system.efectosPNJ.estres.habilitado" {{checked system.efectosPNJ.estres.habilitado}}>
+            {{/if}}
+        </div>
+
+        <div class="pnj-effect-row {{#unless system.efectosPNJ.dano.activo}}inactive{{/unless}}">
+            <input type="checkbox" name="system.efectosPNJ.dano.activo" {{checked system.efectosPNJ.dano.activo}}>
+            <label>{{localize "AKDENIZ.PNJ.Dano"}}</label>
+            {{#if system.efectosPNJ.dano.activo}}
+                <input type="text" name="system.efectosPNJ.dano.usos" value="{{system.efectosPNJ.dano.usos}}" placeholder="∞">
+                <input type="number" name="system.efectosPNJ.dano.valor" value="{{system.efectosPNJ.dano.valor}}">
+                <input type="checkbox" name="system.efectosPNJ.dano.habilitado" {{checked system.efectosPNJ.dano.habilitado}}>
+            {{/if}}
+        </div>
+    </div>
+    {{/if}}
+
+    <div class="sheet-section description">
+        {{editor system.description target="system.description" button=true owner=owner editable=editable}}
+    </div>
+
+  </div>
+</form>

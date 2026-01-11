@@ -1,0 +1,35 @@
+{
+  "id": "akdeniz",
+  "title": "Akdeniz",
+  "description": "Sistema de juego para el mundo de Akdeniz, basado en reservas de d6 y d12.",
+  "version": "3.0.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "authors": [
+    {
+      "name": "Tu Nombre",
+      "flags": {}
+    }
+  ],
+  "esmodules": [
+    "akdeniz.js"
+  ],
+  "styles": [
+    "styles/akdeniz.css"
+  ],
+  "languages": [
+    {
+      "lang": "es",
+      "name": "Español",
+      "path": "lang/es.json"
+    }
+  ],
+  "packs": [],
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "license": "",
+  "readme": ""
+}

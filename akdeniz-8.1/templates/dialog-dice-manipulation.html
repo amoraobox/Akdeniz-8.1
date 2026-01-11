@@ -1,0 +1,142 @@
+<form class="akdeniz-dice-manipulation">
+    <p style="text-align: center; font-style: italic; margin-bottom: 10px; color: #444;">
+        {{mensaje}}
+    </p>
+
+    <div class="dice-area">
+        
+        {{#if diceD6.length}}
+        <div class="dice-group">
+            <h4 style="border-bottom: 1px solid #ccc; margin-bottom: 5px; font-size: 0.9em; color: #666;">Planteamiento (d6)</h4>
+            <div class="dice-row">
+                {{#each diceD6 as |die idx|}}
+                <div class="die-container" data-type="d6" data-index="{{idx}}" data-original="{{die.result}}">
+                    
+                    {{#if ../isPlegaria}}
+                    <a class="mod-btn up"><i class="fas fa-chevron-up"></i></a>
+                    {{/if}}
+
+                    <div class="die-shape die-d6 {{#if (gte die.result 5)}}exito{{/if}}">
+                        <span class="numero">{{die.result}}</span>
+                    </div>
+
+                    {{#if ../isPlegaria}}
+                    <a class="mod-btn down"><i class="fas fa-chevron-down"></i></a>
+                    {{/if}}
+
+                    {{#if ../isCapacidad}}
+                    <a class="reroll-btn" title="Relanzar (1 uso)"><i class="fas fa-sync-alt"></i></a>
+                    {{/if}}
+                    
+                </div>
+                {{/each}}
+            </div>
+        </div>
+        {{/if}}
+
+        {{#if diceD12.length}}
+        <div class="dice-group" style="margin-top: 15px;">
+            <h4 style="border-bottom: 1px solid #ccc; margin-bottom: 5px; font-size: 0.9em; color: #666;">Habilidad (d12)</h4>
+            <div class="dice-row">
+                {{#each diceD12 as |die idx|}}
+                <div class="die-container" data-type="d12" data-index="{{idx}}" data-original="{{die.result}}">
+                    
+                    {{#if ../isPlegaria}}
+                    <a class="mod-btn up"><i class="fas fa-chevron-up"></i></a>
+                    {{/if}}
+
+                    <div class="die-shape die-d12 {{#if (gte die.result 10)}}exito{{/if}}">
+                        <span class="numero">{{die.result}}</span>
+                    </div>
+
+                    {{#if ../isPlegaria}}
+                    <a class="mod-btn down"><i class="fas fa-chevron-down"></i></a>
+                    {{/if}}
+
+                    {{#if ../isCapacidad}}
+                    <a class="reroll-btn" title="Relanzar (1 uso)"><i class="fas fa-sync-alt"></i></a>
+                    {{/if}}
+
+                </div>
+                {{/each}}
+            </div>
+        </div>
+        {{/if}}
+
+    </div>
+</form>
+
+<style>
+    .akdeniz-dice-manipulation .dice-row {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .akdeniz-dice-manipulation .die-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 5px;
+        border-radius: 5px;
+        transition: background-color 0.2s;
+    }
+    
+    /* FEEDBACK VISUAL */
+    .akdeniz-dice-manipulation .die-container.modified {
+        background-color: #fff3cd; /* Amarillo/Naranja suave para Plegaria */
+        border: 1px solid #ffeeba;
+    }
+    .akdeniz-dice-manipulation .die-container.rerolled {
+        background-color: #cff4fc; /* Azul suave para Reroll */
+        border: 1px solid #b6effb;
+    }
+
+    .akdeniz-dice-manipulation .die-shape {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #555;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+        font-weight: bold;
+        border-radius: 5px;
+        position: relative;
+        z-index: 1;
+    }
+    .akdeniz-dice-manipulation .die-d12 {
+        border-radius: 0;
+        width: 42px;
+        height: 42px;
+        clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+        background: #6c757d;
+        color: white;
+    }
+    .akdeniz-dice-manipulation .die-shape.exito {
+        background-color: #d4edda;
+        border-color: #28a745;
+        color: #155724;
+    }
+    .akdeniz-dice-manipulation .die-d12.exito {
+        background-color: #28a745; 
+        color: white;
+    }
+
+    .mod-btn { cursor: pointer; color: #888; font-size: 0.9em; transition: all 0.2s; }
+    .mod-btn:hover { color: #000; transform: scale(1.2); font-weight: bold; }
+    
+    .reroll-btn { cursor: pointer; color: #d63384; margin-top: 3px; }
+    .reroll-btn:hover { color: #a00; transform: rotate(180deg); transition: transform 0.3s; }
+    
+    /* Deshabilitado visualmente */
+    .die-container.disabled-controls .mod-btn,
+    .die-container.disabled-controls .reroll-btn {
+        opacity: 0.2;
+        pointer-events: none;
+        cursor: default;
+    }
+</style>
