@@ -5,12 +5,6 @@
         <input name="name" type="text" value="{{item.name}}" placeholder="{{localize "AKDENIZ.Item.NombreTalento"}}" style="width: 100%; font-size: 1.2em;"/>
       </div>
       
-      {{#if mecanicaTexto}}
-      <div style="flex: 3; background: #eef; border: 1px solid #aac; border-radius: 4px; padding: 5px; text-align: center; font-size: 0.85em; color: #335; display: flex; align-items: center; justify-content: center;">
-          {{mecanicaTexto}}
-      </div>
-      {{/if}}
-
       <div style="flex: 1.5; text-align: right;">
         <label style="display:block; font-size: 0.8em; color: #555;">{{localize "AKDENIZ.TalentoTipo"}}</label>
         <select name="system.tipoTalento">
@@ -26,63 +20,40 @@
 
   <div class="sheet-body">
     
+    <div class="sheet-section description" style="min-height: 200px;">
+        {{editor system.description target="system.description" button=true owner=owner editable=editable}}
+    </div>
+
     {{#if (eq system.tipoTalento "PNJ")}}
-    <div class="efectos-pnj-container">
-        <h3 style="border-bottom: 1px solid #ccc; margin-bottom: 5px;">{{localize "AKDENIZ.EfectosPNJ"}}</h3>
-        
-        <div class="pnj-effects-grid-header">
-            <span>{{localize "AKDENIZ.PNJ.Activo"}}</span>
-            <span>Efecto</span>
-            <span>{{localize "AKDENIZ.PNJ.Usos"}}</span>
-            <span>{{localize "AKDENIZ.PNJ.Valor"}}</span>
-            <span>{{localize "AKDENIZ.PNJ.Habilitado"}}</span>
+    <hr>
+    <label style="display:block; text-align:center; font-weight:bold; margin-bottom:5px;">Configuración de Estadísticas (Solo PNJ)</label>
+    <div class="efectos-pnj-container" style="display: flex; gap: 5px; background: #f0f0f0; padding: 5px; border: 1px solid #ccc; margin-bottom: 10px; justify-content: space-around;">
+        <div style="text-align: center;">
+            <label style="font-size: 0.8em; display:block;">Vida</label>
+            <input type="checkbox" name="system.efectosPNJ.vida.activo" {{checked system.efectosPNJ.vida.activo}} data-tooltip="Activar bono"/>
+            <input type="number" name="system.efectosPNJ.vida.valor" value="{{system.efectosPNJ.vida.valor}}" style="width: 40px; text-align: center;" placeholder="0"/>
+            <input type="checkbox" name="system.efectosPNJ.vida.habilitado" {{checked system.efectosPNJ.vida.habilitado}} data-tooltip="Aplicar"/>
         </div>
-
-        <div class="pnj-effect-row {{#unless system.efectosPNJ.desafio.activo}}inactive{{/unless}}">
-            <input type="checkbox" name="system.efectosPNJ.desafio.activo" {{checked system.efectosPNJ.desafio.activo}}>
-            <label>{{localize "AKDENIZ.PNJ.Desafio"}}</label>
-            {{#if system.efectosPNJ.desafio.activo}}
-                <input type="text" name="system.efectosPNJ.desafio.usos" value="{{system.efectosPNJ.desafio.usos}}" placeholder="∞">
-                <input type="number" name="system.efectosPNJ.desafio.valor" value="{{system.efectosPNJ.desafio.valor}}">
-                <input type="checkbox" name="system.efectosPNJ.desafio.habilitado" {{checked system.efectosPNJ.desafio.habilitado}}>
-            {{/if}}
+        <div style="text-align: center;">
+            <label style="font-size: 0.8em; display:block;">Estrés</label>
+            <input type="checkbox" name="system.efectosPNJ.estres.activo" {{checked system.efectosPNJ.estres.activo}} data-tooltip="Activar bono"/>
+            <input type="number" name="system.efectosPNJ.estres.valor" value="{{system.efectosPNJ.estres.valor}}" style="width: 40px; text-align: center;" placeholder="0"/>
+            <input type="checkbox" name="system.efectosPNJ.estres.habilitado" {{checked system.efectosPNJ.estres.habilitado}} data-tooltip="Aplicar"/>
         </div>
-
-        <div class="pnj-effect-row {{#unless system.efectosPNJ.vida.activo}}inactive{{/unless}}">
-            <input type="checkbox" name="system.efectosPNJ.vida.activo" {{checked system.efectosPNJ.vida.activo}}>
-            <label>{{localize "AKDENIZ.PNJ.Vida"}}</label>
-            {{#if system.efectosPNJ.vida.activo}}
-                <input type="text" name="system.efectosPNJ.vida.usos" value="{{system.efectosPNJ.vida.usos}}" placeholder="∞">
-                <input type="number" name="system.efectosPNJ.vida.valor" value="{{system.efectosPNJ.vida.valor}}">
-                <input type="checkbox" name="system.efectosPNJ.vida.habilitado" {{checked system.efectosPNJ.vida.habilitado}}>
-            {{/if}}
+        <div style="text-align: center;">
+            <label style="font-size: 0.8em; display:block;">Desafío</label>
+            <input type="checkbox" name="system.efectosPNJ.desafio.activo" {{checked system.efectosPNJ.desafio.activo}} data-tooltip="Activar bono"/>
+            <input type="number" name="system.efectosPNJ.desafio.valor" value="{{system.efectosPNJ.desafio.valor}}" style="width: 40px; text-align: center;" placeholder="0"/>
+            <input type="checkbox" name="system.efectosPNJ.desafio.habilitado" {{checked system.efectosPNJ.desafio.habilitado}} data-tooltip="Aplicar"/>
         </div>
-
-        <div class="pnj-effect-row {{#unless system.efectosPNJ.estres.activo}}inactive{{/unless}}">
-            <input type="checkbox" name="system.efectosPNJ.estres.activo" {{checked system.efectosPNJ.estres.activo}}>
-            <label>{{localize "AKDENIZ.PNJ.Estres"}}</label>
-            {{#if system.efectosPNJ.estres.activo}}
-                <input type="text" name="system.efectosPNJ.estres.usos" value="{{system.efectosPNJ.estres.usos}}" placeholder="∞">
-                <input type="number" name="system.efectosPNJ.estres.valor" value="{{system.efectosPNJ.estres.valor}}">
-                <input type="checkbox" name="system.efectosPNJ.estres.habilitado" {{checked system.efectosPNJ.estres.habilitado}}>
-            {{/if}}
-        </div>
-
-        <div class="pnj-effect-row {{#unless system.efectosPNJ.dano.activo}}inactive{{/unless}}">
-            <input type="checkbox" name="system.efectosPNJ.dano.activo" {{checked system.efectosPNJ.dano.activo}}>
-            <label>{{localize "AKDENIZ.PNJ.Dano"}}</label>
-            {{#if system.efectosPNJ.dano.activo}}
-                <input type="text" name="system.efectosPNJ.dano.usos" value="{{system.efectosPNJ.dano.usos}}" placeholder="∞">
-                <input type="number" name="system.efectosPNJ.dano.valor" value="{{system.efectosPNJ.dano.valor}}">
-                <input type="checkbox" name="system.efectosPNJ.dano.habilitado" {{checked system.efectosPNJ.dano.habilitado}}>
-            {{/if}}
+        <div style="text-align: center;">
+            <label style="font-size: 0.8em; display:block;">Daño</label>
+            <input type="checkbox" name="system.efectosPNJ.dano.activo" {{checked system.efectosPNJ.dano.activo}} data-tooltip="Activar bono"/>
+            <input type="number" name="system.efectosPNJ.dano.valor" value="{{system.efectosPNJ.dano.valor}}" style="width: 40px; text-align: center;" placeholder="0"/>
+            <input type="checkbox" name="system.efectosPNJ.dano.habilitado" {{checked system.efectosPNJ.dano.habilitado}} data-tooltip="Aplicar"/>
         </div>
     </div>
     {{/if}}
-
-    <div class="sheet-section description">
-        {{editor system.description target="system.description" button=true owner=owner editable=editable}}
-    </div>
 
   </div>
 </form>

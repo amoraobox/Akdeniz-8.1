@@ -1,32 +1,28 @@
 <form class="{{cssClass}} akdeniz-item-sheet flexcol" autocomplete="off">
-  <h1 class="charname-container">
-      <input name="name" type="text" value="{{item.name}}" placeholder="{{localize "AKDENIZ.Item.NombreArma"}}"/>
-  </h1>
+  
+  <header class="charname-container" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 5px;">
+      
+      <img src="{{item.img}}" data-edit="img" title="{{item.name}}" height="50" width="50" style="border:none; border-radius: 5px;"/>
 
-  <div class="item-body-grid">
-      <div class="icon-container">
-        <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
+      <div style="flex: 2;">
+        <input name="name" type="text" value="{{item.name}}" placeholder="{{localize "AKDENIZ.Item.NombreArma"}}" style="width: 100%; font-size: 1.5em; border: none; background: transparent; font-weight: bold;"/>
       </div>
       
-      <div class="fields-column flexcol">
-          
-          <div class="form-group form-group-descripcion">
-            <label>{{localize "AKDENIZ.Item.Descripcion"}}</label>
-            <textarea name="system.description">{{system.description}}</textarea>
-          </div>
-
-          <div class="specific-field-wrapper">
-             <div class="form-group specific-field">
-                <label>{{localize "AKDENIZ.Item.CategoriaDano"}}</label>
-                <select name="system.categoriaDano">
-                    <option value="Sin arma" {{#if (eq system.categoriaDano "Sin arma")}}selected{{/if}}>{{localize "AKDENIZ.Item.Dano.SinArma"}}</option> 
-                    <option value="Pequeña" {{#if (eq system.categoriaDano "Pequeña")}}selected{{/if}}>{{localize "AKDENIZ.Item.Dano.Pequena"}}</option> 
-                    <option value="Espada" {{#if (eq system.categoriaDano "Espada")}}selected{{/if}}>{{localize "AKDENIZ.Item.Dano.Espada"}}</option> 
-                    <option value="Fuego" {{#if (eq system.categoriaDano "Fuego")}}selected{{/if}}>{{localize "AKDENIZ.Item.Dano.Fuego"}}</option> 
-                    <option value="Explosion" {{#if (eq system.categoriaDano "Explosion")}}selected{{/if}}>{{localize "AKDENIZ.Item.Dano.Explosion"}}</option>
-                </select>
-             </div>
-          </div>
+      <div style="flex: 1; text-align: right;">
+        <label style="display:block; font-size: 0.8em; color: #555; font-weight: bold;">{{localize "AKDENIZ.Item.CategoriaDano"}}</label>
+        <select name="system.categoriaDano" style="width: 100%;">
+            <option value="Sin arma" {{#if (eq system.categoriaDano "Sin arma")}}selected{{/if}}>{{localize "AKDENIZ.Item.Dano.SinArma"}}</option> 
+            <option value="Pequeña" {{#if (eq system.categoriaDano "Pequeña")}}selected{{/if}}>{{localize "AKDENIZ.Item.Dano.Pequena"}}</option> 
+            <option value="Espada" {{#if (eq system.categoriaDano "Espada")}}selected{{/if}}>{{localize "AKDENIZ.Item.Dano.Espada"}}</option> 
+            <option value="Fuego" {{#if (eq system.categoriaDano "Fuego")}}selected{{/if}}>{{localize "AKDENIZ.Item.Dano.Fuego"}}</option> 
+            <option value="Explosion" {{#if (eq system.categoriaDano "Explosion")}}selected{{/if}}>{{localize "AKDENIZ.Item.Dano.Explosion"}}</option>
+        </select>
       </div>
+  </header>
+
+  <div class="sheet-body">
+    <div class="sheet-section description" style="min-height: 300px;">
+        {{editor system.description target="system.description" button=true owner=owner editable=editable}}
+    </div>
   </div>
 </form>
