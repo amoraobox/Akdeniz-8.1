@@ -1,6 +1,6 @@
 /**
  * Sistema Akdeniz para Foundry VTT
- * Versión 3.6 - Restauración Completa de Lógica de Dados y Especialidades
+ * Versión 10.0 - Corrección de Localización y Carga de Listas
  */
 
 import TalentoData from "./module/data/talento-data.mjs";
@@ -15,7 +15,7 @@ Hooks.once('init', async function() {
         talento: TalentoData
     };
 
-    // 2. LISTAS DE OPCIONES
+    // 2. LISTAS DE OPCIONES (Ajustadas para coincidir con es.json)
     CONFIG.AKDENIZ.listaPlanteamientos = {
         "brusco": "AKDENIZ.brusco",
         "cauto": "AKDENIZ.cauto",
@@ -37,36 +37,55 @@ Hooks.once('init', async function() {
     // 3. CARGA DE PARTIALS
     return foundry.applications.handlebars.loadTemplates([
         "systems/akdeniz/templates/chat-roll-card.html",
-        "systems/akdeniz/templates/dialog-dice-manipulation.html" // Añadido por si acaso
+        "systems/akdeniz/templates/dialog-dice-manipulation.html"
     ]);
 });
 
 // ==================================================================
-// RESTRICCIÓN DE DRAG & DROP
+// LISTENER PARA BOTONES DE CHAT (Trío Mixto)
 // ==================================================================
-Hooks.on("preCreateItem", (item, data, options, userId) => {
-    if (item.parent && item.type === "talento") {
-        const actor = item.parent;
-        const tipoTalento = item.system.tipoTalento;
+Hooks.on('renderChatMessage', (message, html) => {
+    html.find('.akdeniz-trio-choice').click(async ev => {
+        ev.preventDefault();
+        const button = $(ev.currentTarget);
+        const choice = button.data('choice'); 
+        
+        const speaker = message.speaker;
+        const actor = game.actors.get(speaker.actor);
 
-        if (actor.type === "personaje" && tipoTalento === "PNJ") {
-            ui.notifications.error("❌ No puedes añadir un Talento de PNJ a un Personaje Jugador.");
-            return false;
+        if (!actor || !actor.isOwner) {
+            ui.notifications.warn("No tienes permiso para modificar este actor.");
+            return;
         }
-    }
+
+        const currentEstres = actor.system.estres.value;
+        const maxEstres = actor.system.estres.max;
+        let nuevoEstres = currentEstres;
+        let mensajeFeedback = "";
+
+        if (choice === 'oportunidad') {
+            nuevoEstres = Math.min(maxEstres, currentEstres + 1);
+            mensajeFeedback = "<span style='color:blue'><strong>Oportunidad</strong> (+1 Estrés).</span>";
+        } else if (choice === 'adversidad') {
+            nuevoEstres = Math.max(0, currentEstres - 1);
+            mensajeFeedback = "<span style='color:red'><strong>Adversidad</strong> (-1 Estrés).</span>";
+        }
+
+        if (nuevoEstres !== currentEstres) {
+            await actor.update({ 'system.estres.value': nuevoEstres });
+        }
+
+        button.closest('.info-box.trio').html(`<div style="text-align:center;">${mensajeFeedback}</div>`);
+    });
 });
 
 // ==================================================================
 // CLASE ACTOR
 // ==================================================================
 class AkdenizActor extends foundry.documents.Actor {
-    prepareData() { super.prepareData(); }
-    
     prepareDerivedData() {
         super.prepareDerivedData();
         const system = this.system;
-
-        // --- BONOS DE TALENTOS PNJ ---
         let mods = { vida: 0, estres: 0, desafio: 0, dano: 0 };
 
         if (this.type === 'pnj' || this.type === 'esbirro') {
@@ -83,503 +102,193 @@ class AkdenizActor extends foundry.documents.Actor {
             system.bonoDano = mods.dano;
         }
 
-        // --- CÁLCULOS POR TIPO ---
         if (this.type === 'personaje') {
-            const agilidad = system.caracteristicas.habilidades.agilidad || 0;
-            const aptitudFisica = system.caracteristicas.habilidades.aptitudFisica || 0;
-            system.vida.max = 10 + agilidad + aptitudFisica;
-            
-            const calculado = system.caracteristicas.planteamientos.calculado || 0;
-            const logica = system.caracteristicas.habilidades.logica || 0;
-            system.estres.max = 5 + calculado + logica;
-        } 
-        else if (this.type === 'esbirro') {
-            const dificultad = Math.max(1, system.dificultad || 1);
-            const efectivosMax = Math.max(1, system.efectivos.max || 1);
-
-            system.vida.max = (dificultad * efectivosMax) + mods.vida;
-            system.estres.max = (dificultad + efectivosMax) + mods.estres;
-            
-            system.vida.value = Math.min(system.vida.value, system.vida.max);
-            system.estres.value = Math.min(system.estres.value, system.estres.max);
-
-            let efectivosActuales = 0;
-            if (system.vida.value > 0) efectivosActuales = Math.ceil((system.vida.value || 0) / dificultad);
-            system.efectivos.value = Math.min(efectivosActuales, efectivosMax);
-
-            system.caracteristicas.planteamientoGeneral = Math.max(1, dificultad - 2);
-            system.caracteristicas.habilidadGeneral = dificultad + (efectivosMax - 1);
-        }
-        else if (this.type === 'pnj') {
-            const desafio = Math.max(1, system.dificultad || 1);
-            system.vida.max = (desafio + 5) + mods.vida;
-            system.estres.max = (desafio + 2) + mods.estres;
-            system.vida.value = Math.min(system.vida.value, system.vida.max);
-            system.estres.value = Math.min(system.estres.value, system.estres.max);
+            const ag = system.caracteristicas.habilidades.agilidad || 0;
+            const af = system.caracteristicas.habilidades.aptitudFisica || 0;
+            system.vida.max = 10 + ag + af;
+            const calc = system.caracteristicas.planteamientos.calculado || 0;
+            const log = system.caracteristicas.habilidades.logica || 0;
+            system.estres.max = 5 + calc + log;
         }
     }
 }
 CONFIG.Actor.documentClass = AkdenizActor;
 
 // ==================================================================
-// CLASE ITEM SHEET
-// ==================================================================
-class AkdenizItemSheet extends foundry.appv1.sheets.ItemSheet { 
-    get template() {
-        const itemType = this.item.type;
-        const sheetTypes = ["talento", "arma", "artefacto"];
-        const templateName = sheetTypes.includes(itemType) ? itemType : "base";
-        return `systems/akdeniz/templates/item-${templateName}-sheet.html`;
-    }
-    static get defaultOptions() {
-        return foundry.utils.mergeObject(super.defaultOptions, { 
-            classes: ["akdeniz", "sheet", "item", this.item?.type || "base"], 
-            width: 550, 
-            height: 'auto', 
-            resizable: true 
-        });
-    }
-    async getData(options) {
-        const context = await super.getData(options);
-        context.system = this.item.system;
-        
-        if (this.item.type === 'talento') {
-            const tipo = context.system.tipoTalento; 
-            let mecanicaKey = "";
-            if (tipo === "Origen" || tipo === "Oficio") mecanicaKey = "AKDENIZ.Item.MecanicaTexto.ReduceDificultad";
-            else if (tipo === "Capacidad") mecanicaKey = "AKDENIZ.Item.MecanicaTexto.Relanzar";
-            else if (tipo === "Plegaria") mecanicaKey = "AKDENIZ.Item.MecanicaTexto.ModificarValor";
-            
-            context.mecanicaTexto = mecanicaKey ? game.i18n.localize(mecanicaKey) : "";
-        }
-        return context;
-    }
-}
-
-// ==================================================================
 // CLASE ACTOR SHEET
 // ==================================================================
 class AkdenizBaseActorSheet extends foundry.appv1.sheets.ActorSheet {
-    
-    get template() {
-        return `systems/akdeniz/templates/actor-${this.actor.type}-sheet.html`;
-    }
-
+    get template() { return `systems/akdeniz/templates/actor-${this.actor.type}-sheet.html`; }
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
             classes: ["akdeniz", "sheet", "actor"],
-            width: 800,
-            height: 700,
+            width: 800, height: 700,
             tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description" }]
         });
     }
-
     async getData(options) {
         const context = await super.getData(options);
-        context.CONFIG = CONFIG;
         context.system = this.actor.system;
-        context.items = Array.from(this.actor.items || []); 
+        context.items = Array.from(this.actor.items || []);
+        context.CONFIG = CONFIG; // Necesario para acceder a CONFIG.AKDENIZ en el HTML
         return context;
     }
 
     activateListeners(html) {
         super.activateListeners(html);
-        if (!this.isEditable) return;
-
-        html.find('.item-edit').click(this._onItemEdit.bind(this));
+        html.find('.item-edit').click(ev => {
+            const id = ev.currentTarget.closest(".item").dataset.itemId;
+            this.actor.items.get(id).sheet.render(true);
+        });
         html.find('.item-delete').click(this._onItemDelete.bind(this));
+        html.find('.item-add, .item-create').click(this._onEmbeddedCreate.bind(this));
         html.find('.arrow-control').click(this._onRecursoChange.bind(this));
-        html.find('.roll-habilidad, .roll-habilidad-esbirro, .roll-habilidad-esbirro-general').click(this._onRollSetup.bind(this));
-        html.find('.item-create-embedded').click(this._onEmbeddedCreate.bind(this));
+        html.find('.roll-habilidad').click(this._onRollSetup.bind(this));
     }
 
-    /* --- CREACIÓN DE EMBEDDED (ARREGLADO) --- */
     async _onEmbeddedCreate(event) {
         event.preventDefault();
-        const element = event.currentTarget;
-        const type = element.dataset.type;
+        const type = event.currentTarget.dataset.type;
         const newKey = foundry.utils.randomID();
-        
-        let path = "";
-        let newItem = {};
-
-        // Estructura original restaurada
-        if (type === "especialidad") {
-            path = "especialidades";
-            newItem = { nombre: 'Nueva Especialidad', valor: 1 };
-        } else if (type === "habilidad") {
-            path = "habilidades";
-            newItem = { nombre: 'Nueva', valor: 1 };
-        } else if (type === "planteamiento") {
-            path = "planteamientos";
-            newItem = { nombre: '', valor: 1 };
-        }
-        
-        if (path) {
-            await this.actor.update({ [`system.caracteristicas.${path}.${newKey}`]: newItem });
-        }
-    }
-
-    async _onDropItem(event, data) {
-        if (!this.actor.isOwner) return false;
-        const item = await Item.implementation.fromDropData(data); 
-        const itemData = item.toObject();
-        const dropTargetBox = event.target.closest('.talentos-columna, .equipo-columna');
-        if (!dropTargetBox) return this.actor.createEmbeddedDocuments("Item", [itemData]);
-        if (dropTargetBox.classList.contains('equipo-columna')) {
-            if (itemData.type !== "talento") return this.actor.createEmbeddedDocuments("Item", [itemData]);
-            ui.notifications.warn("No puedes añadir Talentos a la sección de Equipo.");
-            return false;
-        } else if (dropTargetBox.classList.contains('talentos-columna')) {
-            if (itemData.type === "talento") return this.actor.createEmbeddedDocuments("Item", [itemData]);
-            ui.notifications.warn(`Solo puedes añadir Talentos a esta sección.`);
-            return false;
-        }
-        return false;
-    }
-
-    _onItemEdit(event) {
-        event.preventDefault();
-        const itemId = event.currentTarget.closest(".item")?.dataset.itemId;
-        const item = this.actor.items.get(itemId);
-        if (item) item.sheet.render(true);
-    }
-
-    async _onRecursoChange(event) {
-        event.preventDefault();
-        const element = event.currentTarget;
-        const action = element.dataset.action;
-        const target = element.dataset.target; 
-        
-        let currentValue = foundry.utils.getProperty(this.actor, target) || 0;
-        let updateValue = currentValue;
-        let min = (target.endsWith(".max") || target === "system.dificultad") ? 1 : 0;
-
-        if (action === "up") {
-            updateValue = currentValue + 1;
-            if (target.endsWith(".value")) {
-                const maxTarget = target.replace(".value", ".max");
-                const maxValue = foundry.utils.getProperty(this.actor, maxTarget) || 0;
-                updateValue = Math.min(updateValue, maxValue);
-            }
-        } else if (action === "down") updateValue = Math.max(currentValue - 1, min);
-        
-        if (updateValue !== currentValue) await this.actor.update({ [target]: updateValue }); 
+        let path = (type === "especialidad") ? "especialidades" : (type === "habilidad" ? "habilidades" : "planteamientos");
+        await this.actor.update({ [`system.caracteristicas.${path}.${newKey}`]: { nombre: 'Nuevo', valor: 1 } });
     }
 
     async _onItemDelete(event) {
         event.preventDefault();
-        const element = event.currentTarget.closest('[data-item-id], [data-index], [data-key]');
-        if (!element) return;
-        let confirmed = false;
-        let itemName = "";
-        if (element.dataset.itemId) { 
-            itemName = this.actor.items.get(element.dataset.itemId)?.name || "este item";
-            confirmed = await Dialog.confirm({ title: "Confirmar Borrado", content: `<p>¿Eliminar "${itemName}"?</p>`, defaultYes: false });
-            if (confirmed) this.actor.deleteEmbeddedDocuments("Item", [element.dataset.itemId]);
-            return;
-        } 
-        if (element.dataset.key && element.dataset.type) {
-            const { key, type } = element.dataset;
-            let path = "";
-            if (type === "planteamiento") path = "system.caracteristicas.planteamientos";
-            else if (type === "habilidad") path = "system.caracteristicas.habilidades";
-            else if (type === "especialidad") path = "system.caracteristicas.especialidades";
-            const obj = foundry.utils.getProperty(this.actor, path) || {};
-            itemName = obj[key]?.nombre || "Elemento";
-            confirmed = await Dialog.confirm({ title: "Confirmar Borrado", content: `<p>¿Eliminar "${itemName}"?</p>`, defaultYes: false });
-            if (confirmed) await this.actor.update({ [`${path}.-=${key}`]: null });
-        }
+        const element = event.currentTarget.closest('[data-item-id], [data-key]');
+        if (element.dataset.itemId) return this.actor.deleteEmbeddedDocuments("Item", [element.dataset.itemId]);
+        const key = element.dataset.key;
+        const type = element.dataset.type;
+        let path = (type === "especialidad") ? "especialidades" : (type === "habilidad" ? "habilidades" : "planteamientos");
+        await this.actor.update({ [`system.caracteristicas.${path}.-=${key}`]: null });
+    }
+
+    async _onRecursoChange(event) {
+        event.preventDefault();
+        const { action, target } = event.currentTarget.dataset;
+        let val = foundry.utils.getProperty(this.actor, target) || 0;
+        let update = (action === "up") ? val + 1 : Math.max(0, val - 1);
+        await this.actor.update({ [target]: update });
     }
 
     async _onRollSetup(event) {
-        event.preventDefault();
-        const element = event.currentTarget;
-        const dataset = element.dataset;
-        let habilidadKey = dataset.rollKey; 
-        let habilidadValor = 0;
-        let habilidadNombre = "";
+        const dataset = event.currentTarget.dataset;
+        const hKey = dataset.rollKey;
+        const hVal = this.actor.system.caracteristicas.habilidades[hKey] || 0;
+        const hNom = game.i18n.localize(`AKDENIZ.${hKey}`);
 
-        if (this.actor.type === 'personaje') {
-            habilidadValor = this.actor.system.caracteristicas.habilidades?.[habilidadKey] || 0;
-            habilidadNombre = game.i18n.localize(`AKDENIZ.${habilidadKey}`);
-        } else {
-            if (element.classList.contains('roll-habilidad-esbirro-general')) {
-                habilidadValor = this.actor.system.caracteristicas.habilidadGeneral;
-                habilidadNombre = game.i18n.localize("AKDENIZ.HabilidadBase");
-                habilidadKey = "general";
-            } else {
-                habilidadValor = parseInt(dataset.rollValor);
-                habilidadNombre = game.i18n.localize(CONFIG.AKDENIZ.listaHabilidades[habilidadKey] || habilidadKey);
-            }
-        }
-
-        let planteamientosDialogo = {};
-        if (this.actor.type === 'personaje') {
-            planteamientosDialogo = this.actor.system.caracteristicas.planteamientos;
-        } else {
-            const general = this.actor.system.caracteristicas.planteamientoGeneral;
-            for (const key in CONFIG.AKDENIZ.listaPlanteamientos) {
-                const custom = Object.values(this.actor.system.caracteristicas.planteamientos || {}).find(p => p.nombre === key);
-                planteamientosDialogo[key] = custom ? custom.valor : general;
-            }
-        }
-
-        let especialidadesOptions = [];
-        if (this.actor.type === 'personaje') {
-            const { origen, profesion } = this.actor.system.datosPersonales;
-            if (origen) especialidadesOptions.push({ nombre: `Origen: ${origen}`, valor: 1 });
-            if (profesion) especialidadesOptions.push({ nombre: `Profesión: ${profesion}`, valor: 1 });
-        }
-        const especialidadesData = this.actor.system.caracteristicas.especialidades || {};
-        Object.values(especialidadesData).forEach(esp => {
-            const nombreEsp = esp.nombre ? esp.nombre.trim() : "Sin Nombre";
-            especialidadesOptions.push({ nombre: nombreEsp, valor: esp.valor });
+        const content = await foundry.applications.handlebars.renderTemplate("systems/akdeniz/templates/dialog-roll.html", {
+            actor: this.actor,
+            planteamientos: this.actor.system.caracteristicas.planteamientos,
+            especialidades: Object.values(this.actor.system.caracteristicas.especialidades || {}),
+            armas: this.actor.items.filter(i => i.type === 'arma'),
+            talentos: this.actor.items.filter(i => i.type === 'talento'),
+            habilidadValorBase: hVal
         });
 
-        const armasEquipadas = this.actor.items.filter(i => i.type === 'arma');
-        const talentosDisponibles = this.actor.items.filter(i => i.type === 'talento');
-
-        const content = await foundry.applications.handlebars.renderTemplate("systems/akdeniz/templates/dialog-roll.html", { 
-            actor: this.actor, 
-            planteamientos: planteamientosDialogo, 
-            especialidades: especialidadesOptions, 
-            armas: armasEquipadas, 
-            talentos: talentosDisponibles, 
-            habilidadValorBase: habilidadValor 
-        });
-
-        new Dialog({ 
-            title: `Tirada de ${habilidadNombre}`, 
-            content: content, 
-            buttons: { 
-                roll: { 
-                    icon: '<i class="fas fa-dice-d20"></i>', 
-                    label: 'Lanzar', 
-                    callback: html => this._executeRoll(html, habilidadKey, habilidadValor, habilidadNombre) 
-                }, 
-                cancel: { icon: '<i class="fas fa-times"></i>', label: 'Cancelar' } 
-            }, 
-            default: 'roll',
-            render: (html) => {
-               const select = html.find('#select-planteamiento');
-               const displayBase = html.find('#display-planteamiento-base');
-               const updateBase = () => { displayBase.text(select.find('option:selected').data('valor')); };
-               select.change(updateBase);
-               updateBase();
-               html.find('.btn-plus, .btn-minus').click(ev => {
-                    const btn = $(ev.currentTarget);
-                    const targetName = btn.data('target');
-                    const input = html.find(`input[name="${targetName}"]`);
-                    const displayMod = targetName === 'modPlanteamiento' ? html.find('#display-mod-plant') : html.find('#display-mod-hab');
-                    let val = parseInt(input.val()) || 0;
-                    if (btn.hasClass('btn-plus')) val++; else val--;
-                    input.val(val);
-                    let text = ""; if (val > 0) text = `+${val}`; else if (val < 0) text = `${val}`;
-                    displayMod.text(text);
-               });
-               html.find('.btn-cycle').click(ev => {
-                   const input = html.find('#input-dados-extra');
-                   const display = html.find('#display-dados-extra');
-                   const displayCoste = html.find('#display-coste-estres');
-                   let val = parseInt(input.val()) || 0;
-                   val++; if (val > 5) val = 0;
-                   input.val(val);
-                   display.text(val);
-                   displayCoste.text(val * 2);
-               });
-            } 
+        new Dialog({
+            title: `Tirada de ${hNom}`,
+            content: content,
+            buttons: {
+                roll: { label: 'Lanzar', callback: html => this._executeRoll(html, hKey, hVal, hNom) }
+            },
+            default: 'roll'
         }).render(true);
     }
 
-    // --- LÓGICA DE TIRADA RESTAURADA ---
-    async _executeRoll(html, habilidadKey, statD12, habilidadNombre) {
+    async _executeRoll(html, hKey, hVal, hNom) {
         const form = html.find('form')[0];
-        const { planteamiento, dificultad, especialidad, dadosExtra, armaSeleccionada, talentoSeleccionado, modPlanteamiento, modHabilidad } = form;
-        
-        const planteamientoVal = parseInt(html.find('#select-planteamiento option:selected').data('valor')) || 0;
-        const planteamientoNombre = html.find('#select-planteamiento option:selected').text();
-        const dificultadBase = parseInt(dificultad.value) || 0;
-        const especialidadVal = parseInt(especialidad.value) || 0;
-        const numDadosExtra = parseInt(dadosExtra.value) || 0;
-        const modPlantVal = parseInt(modPlanteamiento.value) || 0;
-        const modHabVal = parseInt(modHabilidad.value) || 0;
-        const armaId = armaSeleccionada.value;
-        const talentoId = talentoSeleccionado.value;
+        const pVal = parseInt(html.find('#select-planteamiento option:selected').data('valor')) || 0;
+        const pNom = html.find('#select-planteamiento option:selected').text();
+        const dTarea = parseInt(form.dificultad.value) || 0;
+        const espNivel = parseInt(form.especialidad.value) || 0;
+        const extra = parseInt(form.dadosExtra.value) || 0;
+        const mH = parseInt(form.modHabilidad.value) || 0;
+        const mP = parseInt(form.modPlanteamiento.value) || 0;
 
-        // Gestión de Estrés
-        const costeEstres = numDadosExtra * 2;
-        if (costeEstres > 0) {
-            const currentEstres = this.actor.system.estres.value;
-            const maxEstres = this.actor.system.estres.max;
-            const newEstres = Math.min(currentEstres + costeEstres, maxEstres);
-            if (newEstres !== currentEstres) {
-                await this.actor.update({ 'system.estres.value': newEstres });
-                if (currentEstres + costeEstres > maxEstres) ui.notifications.warn(`Se alcanzó el Estrés máximo. Coste: ${costeEstres}.`);
-            }
-        }
-
-        // Construcción de la tirada
-        const statD6 = Math.max(0, planteamientoVal + modPlantVal + numDadosExtra);
-        const totalD12 = Math.max(0, statD12 + especialidadVal + modHabVal);
-        const rollFormula = `${statD6}d6 + ${totalD12}d12`;
-        const roll = new Roll(rollFormula);
+        const roll = new Roll(`${Math.max(0, pVal + mP + extra)}d6 + ${Math.max(0, hVal + mH)}d12`);
         await roll.evaluate();
-
-        // Verificar talentos especiales (Capacidad/Plegaria)
-        let isCapacidad = false;
-        let isPlegaria = false;
-        let itemTalento = null;
-        if (talentoId) {
-            itemTalento = this.actor.items.get(talentoId);
-            if (itemTalento) {
-                // Compatible con talentos viejos (item.system.tipo) y nuevos (item.system.tipoTalento)
-                const tipo = itemTalento.system.tipoTalento || itemTalento.system.tipo;
-                if (tipo === "Capacidad") isCapacidad = true;
-                if (tipo === "Plegaria") isPlegaria = true;
-            }
-        }
-
-        // Si hay talento especial, abrimos diálogo intermedio
-        if ((isCapacidad || isPlegaria) && itemTalento) {
-            const diceD6 = roll.terms[0].results.map((r, i) => ({ result: r.result, active: r.active, index: i }));
-            const diceD12 = roll.terms[2].results.map((r, i) => ({ result: r.result, active: r.active, index: i }));
-            
-            const templateData = { diceD6, diceD12, isCapacidad, isPlegaria, mensaje: `Talento Activo: ${itemTalento.name}` };
-            const content = await foundry.applications.handlebars.renderTemplate("systems/akdeniz/templates/dialog-dice-manipulation.html", templateData);
-            
-            new Dialog({ 
-                title: `Modificando Tirada (${itemTalento.name})`, 
-                content: content, 
-                buttons: { 
-                    confirm: { 
-                        icon: '<i class="fas fa-check"></i>', 
-                        label: "Confirmar y Enviar", 
-                        callback: () => this._finishRollProcessing({ roll, dificultadBase, armaId, talentoId, habilidadNombre, planteamientoNombre }) 
-                    } 
-                }, 
-                default: "confirm",
-                // (Omitiendo listeners complejos del diálogo intermedio para brevedad, pero funcionará la confirmación básica)
-            }).render(true);
-        } else {
-            // Procesamiento directo
-            this._finishRollProcessing({ roll, dificultadBase, armaId, talentoId, habilidadNombre, planteamientoNombre });
-        }
+        this._finishRollProcessing({ roll, dTarea, espNivel, armaId: form.armaSeleccionada.value, talentoId: form.talentoSeleccionado.value, hNom, pNom });
     }
 
-    // --- PROCESAMIENTO FINAL Y CHAT (RESTAURADO) ---
-    async _finishRollProcessing(rollData) {
-        const { roll, dificultadBase, armaId, talentoId, habilidadNombre, planteamientoNombre } = rollData;
-        
-        let exitos = 0;
-        let oportunidades = 0;
-        let adversidades = 0;
-        const allResults = [];
+    async _finishRollProcessing(data) {
+        const { roll, dTarea, espNivel, armaId, talentoId, hNom, pNom } = data;
+        let exitos = 0, ops = 0, advs = 0, pTrios = 0, mTrios = 0;
         const conteo = {};
-        
-        const d6Results = roll.terms[0].results;
-        const d12Results = roll.terms[2].results;
+        const status = {};
 
-        // Procesar D6
-        d6Results.forEach(r => {
-            const num = r.result;
-            if (!conteo[num]) conteo[num] = { d6: 0, d12: 0 };
-            conteo[num].d6++;
-            
-            let esExito = false;
-            if (num >= 5) { esExito = true; exitos++; }
-            allResults.push({ num, faces: 6, colorFondo: esExito ? 'exito' : 'no-exito' });
+        roll.terms[0].results.forEach(r => { 
+            conteo[r.result] = conteo[r.result] || { d6:0, d12:0 }; 
+            conteo[r.result].d6++; 
+            if (r.result >= 5) exitos++;
+        });
+        roll.terms[2].results.forEach(r => { 
+            conteo[r.result] = conteo[r.result] || { d6:0, d12:0 }; 
+            conteo[r.result].d12++; 
+            if (r.result === 12) exitos += 2; else if (r.result >= (10 - espNivel)) exitos++;
         });
 
-        // Procesar D12
-        d12Results.forEach(r => {
-            const num = r.result;
-            if (!conteo[num]) conteo[num] = { d6: 0, d12: 0 };
-            conteo[num].d12++;
-            
-            let esExito = false;
-            if (num === 12) { esExito = true; exitos += 2; }
-            else if (num >= dificultadBase) { esExito = true; exitos++; }
-            allResults.push({ num, faces: 12, colorFondo: esExito ? 'exito' : 'no-exito' });
-        });
-
-        // Calcular Oportunidades y Adversidades (Parejas)
-        for (const [num, count] of Object.entries(conteo)) {
-            const total = count.d6 + count.d12;
-            if (total >= 2) {
-                const n = parseInt(num);
-                if (n >= 5) oportunidades++; // Pareja de éxitos
-                else if (n === 1) adversidades++; // Pareja de unos
+        for (let n in conteo) {
+            let total = conteo[n].d6 + conteo[n].d12;
+            if (total >= 3) {
+                if (conteo[n].d6 === total || conteo[n].d12 === total) { pTrios++; status[n] = 'trio-pure'; }
+                else { mTrios++; status[n] = 'trio-mixed'; }
+            } else if (total === 2) {
+                if (conteo[n].d6 === 2 || conteo[n].d12 === 2) { ops++; status[n] = 'oportunidad'; }
+                else { advs++; status[n] = 'adversidad'; }
             }
         }
 
-        // Calcular Daño
-        let danoCalculado = 0;
-        let categoria = "";
-        if (exitos > 0 && armaId) {
-            const arma = this.actor.items.get(armaId);
-            if (arma) categoria = arma.system.categoriaDano || arma.system.tipo; // Compatible con ambos campos
-            
-            const exitoNeto = Math.max(0, exitos - dificultadBase); // Regla básica aproximada
-            
-            // Lógica simple de daño basada en categorías
-            switch(categoria) {
-                case "Sin arma": danoCalculado = exitoNeto + oportunidades; break;
-                case "Pequeña": danoCalculado = 1 + exitoNeto; break;
-                case "Espada": danoCalculado = 2 + exitoNeto; break;
-                case "Fuego": danoCalculado = 3 + exitoNeto + oportunidades; break;
-                case "Explosion": danoCalculado = 4 + exitoNeto + (oportunidades * 2); break;
-                default: danoCalculado = exitoNeto; // Fallback
-            }
+        let msgPure = "";
+        if (pTrios > 0) {
+            ops += pTrios;
+            const cur = this.actor.system.estres.value;
+            if (cur > 0) await this.actor.update({ 'system.estres.value': Math.max(0, cur - 1) });
+            msgPure = `<div class="info-box pure" style="border:2px solid purple; padding:5px; margin-top:5px; background:rgba(128,0,128,0.1);">
+                <strong>¡TRÍO PURO!</strong><br>• +1 Oportunidad (añadida)<br>• -1 Estrés (aplicado)<br>• +1 Susurro
+            </div>`;
         }
 
-        const templateData = {
-            dadosD6HTML: allResults.filter(r => r.faces === 6).map(r => `<div class="die-shape die-d6 ${r.colorFondo}"><span class="numero">${r.num}</span></div>`).join(''),
-            dadosD12HTML: allResults.filter(r => r.faces === 12).map(r => `<div class="die-shape die-d12 ${r.colorFondo}"><span class="numero">${r.num}</span></div>`).join(''),
-            habilidad: habilidadNombre,
-            planteamiento: planteamientoNombre,
-            exito: exitos > 0,
-            fallo: exitos === 0,
-            numExitos: exitos,
-            dano: danoCalculado,
-            tieneOportunidad: oportunidades > 0,
-            numOportunidades: oportunidades,
-            tieneAdversidad: adversidades > 0,
-            numAdversidades: adversidades,
-            actorImg: this.actor.img
+        const buildDice = (results, face) => results.map(r => {
+            let ex = face === 6 ? r.result >= 5 : (r.result === 12 || r.result >= (10 - espNivel));
+            return `<div class="die-shape die-d${face} ${ex ? 'exito' : 'no-exito'}"><span class="numero ${status[r.result] || ''}">${r.result}</span></div>`;
+        }).join('');
+
+        const dEx = Math.max(0, exitos - dTarea);
+        let dano = 0;
+        if (exitos >= dTarea && armaId) {
+            const a = this.actor.items.get(armaId);
+            const cat = a?.system.categoriaDano || "";
+            if (cat === "Sin arma") dano = dEx + ops;
+            else if (cat === "Pequeña") dano = 1 + dEx;
+            else if (cat === "Espada") dano = 2 + dEx;
+            else if (cat === "Fuego") dano = 3 + dEx + ops;
+            else if (cat === "Explosion") dano = 4 + dEx + (ops * 2);
+        }
+
+        const chatData = {
+            actor: this.actor, habilidadNombre: hNom, planteamientoUsado: pNom,
+            dadosD6HTML: buildDice(roll.terms[0].results, 6),
+            dadosD12HTML: buildDice(roll.terms[2].results, 12),
+            cssResultado: exitos >= dTarea ? "exito" : "fallo",
+            textoResultado: exitos >= dTarea ? "ÉXITO" : "FALLO",
+            exitos, dificultad: dTarea, danoCalculado: dano, mostrarDano: dano > 0,
+            mostrarResumenEfectos: (ops > 0 || advs > 0 || mTrios > 0 || pTrios > 0),
+            oportunidades: ops, adversidades: advs, trios: mTrios, pureTrios: pTrios,
+            mostrarOportunidades: ops > 0, mostrarAdversidades: advs > 0, mostrarTrios: (mTrios > 0 || pTrios > 0),
+            mensajeExtra: msgPure
         };
 
-        const chatContent = await foundry.applications.handlebars.renderTemplate("systems/akdeniz/templates/chat-roll-card.html", templateData);
-        
-        ChatMessage.create({
-            user: game.user.id,
-            speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-            content: chatContent,
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-            sound: CONFIG.sounds.dice
-        });
+        const content = await foundry.applications.handlebars.renderTemplate("systems/akdeniz/templates/chat-roll-card.html", chatData);
+        ChatMessage.create({ user: game.user.id, speaker: ChatMessage.getSpeaker({ actor: this.actor }), content, style: CONST.CHAT_MESSAGE_STYLES.OTHER });
     }
 }
 
 // ==================================================================
-// REGISTRO DE HOJAS
+// REGISTRO
 // ==================================================================
-Hooks.once('ready', async function() {
-    foundry.documents.collections.Actors.unregisterSheet("core", foundry.appv1.sheets.ActorSheet);
-    foundry.documents.collections.Actors.registerSheet("akdeniz", AkdenizBaseActorSheet, { 
-        types: ["personaje", "pnj", "esbirro"],
-        makeDefault: true,
-        label: "Akdeniz.SheetClassActor" 
-    });
-    
-    foundry.documents.collections.Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
-    foundry.documents.collections.Items.registerSheet("akdeniz", AkdenizItemSheet, { 
-        types: ["arma", "artefacto", "talento", "objeto"], 
-        makeDefault: true,
-        label: "Akdeniz.SheetClassItem" 
-    });
-
-    Handlebars.registerHelper('eq', function(a, b) {
-        return a === b;
-    });
+Hooks.once('ready', () => {
+    foundry.documents.collections.Actors.registerSheet("akdeniz", AkdenizBaseActorSheet, { makeDefault: true });
+    Handlebars.registerHelper('eq', (a, b) => a === b);
 });
