@@ -1,6 +1,6 @@
 /**
  * Sistema Akdeniz para Foundry VTT
- * Versión 10.0 - Corrección de Localización y Carga de Listas
+ * Versión 10.5 - Restricción de Drop y Ajuste de Diseño
  */
 
 import TalentoData from "./module/data/talento-data.mjs";
@@ -15,7 +15,7 @@ Hooks.once('init', async function() {
         talento: TalentoData
     };
 
-    // 2. LISTAS DE OPCIONES (Ajustadas para coincidir con es.json)
+    // 2. LISTAS DE OPCIONES
     CONFIG.AKDENIZ.listaPlanteamientos = {
         "brusco": "AKDENIZ.brusco",
         "cauto": "AKDENIZ.cauto",
@@ -41,8 +41,18 @@ Hooks.once('init', async function() {
     ]);
 });
 
+Hooks.once('ready', () => {
+    Actors.unregisterSheet("core", ActorSheet);
+    Items.unregisterSheet("core", ItemSheet);
+
+    Actors.registerSheet("akdeniz", AkdenizActorSheet, { makeDefault: true });
+    Items.registerSheet("akdeniz", AkdenizItemSheet, { makeDefault: true });
+    
+    Handlebars.registerHelper('eq', (a, b) => a === b);
+});
+
 // ==================================================================
-// LISTENER PARA BOTONES DE CHAT (Trío Mixto)
+// LOGICA DE DADOS (CHAT)
 // ==================================================================
 Hooks.on('renderChatMessage', (message, html) => {
     html.find('.akdeniz-trio-choice').click(async ev => {
@@ -117,8 +127,11 @@ CONFIG.Actor.documentClass = AkdenizActor;
 // ==================================================================
 // CLASE ACTOR SHEET
 // ==================================================================
-class AkdenizBaseActorSheet extends foundry.appv1.sheets.ActorSheet {
-    get template() { return `systems/akdeniz/templates/actor-${this.actor.type}-sheet.html`; }
+class AkdenizActorSheet extends ActorSheet {
+    get template() { 
+        return `systems/akdeniz/templates/actor-${this.actor.type}-sheet.html`; 
+    }
+
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
             classes: ["akdeniz", "sheet", "actor"],
@@ -126,19 +139,23 @@ class AkdenizBaseActorSheet extends foundry.appv1.sheets.ActorSheet {
             tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description" }]
         });
     }
+
     async getData(options) {
         const context = await super.getData(options);
         context.system = this.actor.system;
         context.items = Array.from(this.actor.items || []);
-        context.CONFIG = CONFIG; // Necesario para acceder a CONFIG.AKDENIZ en el HTML
+        context.CONFIG = CONFIG; 
         return context;
     }
 
     activateListeners(html) {
         super.activateListeners(html);
+        if (!this.isEditable) return;
+        
         html.find('.item-edit').click(ev => {
             const id = ev.currentTarget.closest(".item").dataset.itemId;
-            this.actor.items.get(id).sheet.render(true);
+            const item = this.actor.items.get(id);
+            if(item) item.sheet.render(true);
         });
         html.find('.item-delete').click(this._onItemDelete.bind(this));
         html.find('.item-add, .item-create').click(this._onEmbeddedCreate.bind(this));
@@ -146,10 +163,34 @@ class AkdenizBaseActorSheet extends foundry.appv1.sheets.ActorSheet {
         html.find('.roll-habilidad').click(this._onRollSetup.bind(this));
     }
 
+    /**
+     * CONTROL DE DROP (SOLTAR ITEM)
+     * Evita que los Personajes reciban talentos de PNJ
+     */
+    async _onDropItem(event, data) {
+        if (!this.actor.isOwner) return false;
+        
+        // Obtenemos el item que se está intentando soltar
+        const item = await Item.implementation.fromDropData(data);
+        const itemData = item.toObject();
+
+        // REGLA: Si soy Personaje Y el item es Talento PNJ -> PROHIBIDO
+        if (this.actor.type === "personaje" && itemData.type === "talento" && itemData.system.tipoTalento === "PNJ") {
+            ui.notifications.warn("❌ Los Personajes Jugadores no pueden tener Talentos de PNJ.");
+            return false; // Cancelamos el drop
+        }
+
+        // Si pasa la regla, dejamos que Foundry haga su trabajo normal
+        return super._onDropItem(event, data);
+    }
+
     async _onEmbeddedCreate(event) {
         event.preventDefault();
         const type = event.currentTarget.dataset.type;
         const newKey = foundry.utils.randomID();
+        if (['arma', 'talento', 'artefacto'].includes(type)) {
+            return await Item.create({name: `Nuevo ${type}`, type: type}, {parent: this.actor});
+        }
         let path = (type === "especialidad") ? "especialidades" : (type === "habilidad" ? "habilidades" : "planteamientos");
         await this.actor.update({ [`system.caracteristicas.${path}.${newKey}`]: { nombre: 'Nuevo', valor: 1 } });
     }
@@ -157,7 +198,9 @@ class AkdenizBaseActorSheet extends foundry.appv1.sheets.ActorSheet {
     async _onItemDelete(event) {
         event.preventDefault();
         const element = event.currentTarget.closest('[data-item-id], [data-key]');
-        if (element.dataset.itemId) return this.actor.deleteEmbeddedDocuments("Item", [element.dataset.itemId]);
+        if (element.dataset.itemId) {
+            return this.actor.deleteEmbeddedDocuments("Item", [element.dataset.itemId]);
+        }
         const key = element.dataset.key;
         const type = element.dataset.type;
         let path = (type === "especialidad") ? "especialidades" : (type === "habilidad" ? "habilidades" : "planteamientos");
@@ -286,9 +329,35 @@ class AkdenizBaseActorSheet extends foundry.appv1.sheets.ActorSheet {
 }
 
 // ==================================================================
-// REGISTRO
+// CLASE ITEM SHEET (SEGURA)
 // ==================================================================
-Hooks.once('ready', () => {
-    foundry.documents.collections.Actors.registerSheet("akdeniz", AkdenizBaseActorSheet, { makeDefault: true });
-    Handlebars.registerHelper('eq', (a, b) => a === b);
-});
+class AkdenizItemSheet extends ItemSheet {
+    get template() { 
+        const type = this.item.type;
+        // Solo intentamos cargar plantillas específicas si estamos seguros
+        const supported = ['arma', 'talento', 'artefacto'];
+        
+        if (supported.includes(type)) {
+            return `systems/akdeniz/templates/item-${type}-sheet.html`;
+        }
+        
+        // Para "objeto", "equipo", etc., usamos la base.
+        // Si no te gusta la base, podemos cambiar esto para que use 'item-arma-sheet.html' provisionalmente.
+        return `systems/akdeniz/templates/item-base-sheet.html`;
+    }
+
+    static get defaultOptions() {
+        return foundry.utils.mergeObject(super.defaultOptions, {
+            classes: ["akdeniz", "sheet", "item"],
+            width: 600, height: 500,
+            tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description" }]
+        });
+    }
+
+    async getData(options) {
+        const context = await super.getData(options);
+        context.system = this.item.system;
+        context.CONFIG = CONFIG; 
+        return context;
+    }
+}
